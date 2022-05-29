@@ -1,11 +1,19 @@
 {
-  "name": "evo-swap-periphery",
+  "name": "@evofinance9/bitgert-swap-periphery",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "description": "Bitgert Swap Periphery",
+  "engines": {
+    "node": ">=10"
+  },
+  "files": [
+    "build",
+    "contracts"
+  ],
   "dependencies": {
-    "@BakeryProject/bakery-swap-core": "github:BakeryProject/bakery-swap-core",
-    "@BakeryProject/bakery-swap-lib": "https://github.com/BakeryProject/bakery-swap-lib",
+    "@evofinance9/bitgert-swap-core": "^1.0.1",
+    "@evofinance9/bitgert-swap-lib": "^0.0.1",
     "dotenv": "^16.0.0"
   },
   "devDependencies": {
@@ -15,5 +23,9 @@
     "ethereum-waffle": "^3.0.0",
     "ethers": "^5.0.0",
     "hardhat": "^2.9.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/evofinance9/bitgert-swap-periphery.git"
   }
 }
