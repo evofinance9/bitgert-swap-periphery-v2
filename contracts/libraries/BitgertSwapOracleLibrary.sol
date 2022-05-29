@@ -1,10 +1,10 @@
 pragma solidity >=0.5.0;
 
-import '@BakeryProject/bakery-swap-core/contracts/interfaces/IBakerySwapPair.sol';
-import '@BakeryProject/bakery-swap-lib/contracts/utils/FixedPoint.sol';
+import '@evofinance9/bitgert-swap-core/contracts/interfaces/IBitgertSwapPair.sol';
+import '@evofinance9/bitgert-swap-lib/contracts/utils/FixedPoint.sol';
 
 // library with helper methods for oracles that are concerned with computing average prices
-library BakerySwapOracleLibrary {
+library BitgertSwapOracleLibrary {
     using FixedPoint for *;
 
     // helper function that returns the current block timestamp within the range of uint32, i.e. [0, 2**32 - 1]
@@ -23,11 +23,11 @@ library BakerySwapOracleLibrary {
         )
     {
         blockTimestamp = currentBlockTimestamp();
-        price0Cumulative = IBakerySwapPair(pair).price0CumulativeLast();
-        price1Cumulative = IBakerySwapPair(pair).price1CumulativeLast();
+        price0Cumulative = IBitgertSwapPair(pair).price0CumulativeLast();
+        price1Cumulative = IBitgertSwapPair(pair).price1CumulativeLast();
 
         // if time has elapsed since the last update on the pair, mock the accumulated price values
-        (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast) = IBakerySwapPair(pair).getReserves();
+        (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast) = IBitgertSwapPair(pair).getReserves();
         if (blockTimestampLast != blockTimestamp) {
             // subtraction overflow is desired
             uint32 timeElapsed = blockTimestamp - blockTimestampLast;

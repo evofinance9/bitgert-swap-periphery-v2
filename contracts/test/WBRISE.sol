@@ -15,7 +15,7 @@
 
 pragma solidity =0.6.6;
 
-contract WBNB {
+contract WBRISE {
     string public name = 'Wrapped BNB';
     string public symbol = 'WBNB';
     uint8 public decimals = 18;

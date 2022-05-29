@@ -1,6 +1,6 @@
 pragma solidity =0.6.6;
 
-import '@BakeryProject/bakery-swap-lib/contracts/math/SafeMath.sol';
+import '@evofinance9/bitgert-swap-lib/contracts/math/SafeMath.sol';
 
 contract BEP20 {
     using SafeMath for uint256;

@@ -1,6 +1,6 @@
 pragma solidity =0.6.6;
 
-import '../interfaces/IBakerySwapRouter.sol';
+import '../interfaces/IBitgertSwapRouter.sol';
 
 contract RouterEventEmitter {
     event Amounts(uint256[] amounts);
@@ -17,7 +17,7 @@ contract RouterEventEmitter {
     ) external {
         (bool success, bytes memory returnData) = router.delegatecall(
             abi.encodeWithSelector(
-                IBakerySwapRouter(router).swapExactTokensForTokens.selector,
+                IBitgertSwapRouter(router).swapExactTokensForTokens.selector,
                 amountIn,
                 amountOutMin,
                 path,
@@ -39,7 +39,7 @@ contract RouterEventEmitter {
     ) external {
         (bool success, bytes memory returnData) = router.delegatecall(
             abi.encodeWithSelector(
-                IBakerySwapRouter(router).swapTokensForExactTokens.selector,
+                IBitgertSwapRouter(router).swapTokensForExactTokens.selector,
                 amountOut,
                 amountInMax,
                 path,
@@ -51,7 +51,7 @@ contract RouterEventEmitter {
         emit Amounts(abi.decode(returnData, (uint256[])));
     }
 
-    function swapExactBNBForTokens(
+    function swapExactBRISEForTokens(
         address router,
         uint256 amountOutMin,
         address[] calldata path,
@@ -60,7 +60,7 @@ contract RouterEventEmitter {
     ) external payable {
         (bool success, bytes memory returnData) = router.delegatecall(
             abi.encodeWithSelector(
-                IBakerySwapRouter(router).swapExactBNBForTokens.selector,
+                IBitgertSwapRouter(router).swapExactBRISEForTokens.selector,
                 amountOutMin,
                 path,
                 to,
@@ -71,7 +71,7 @@ contract RouterEventEmitter {
         emit Amounts(abi.decode(returnData, (uint256[])));
     }
 
-    function swapTokensForExactBNB(
+    function swapTokensForExactBRISE(
         address router,
         uint256 amountOut,
         uint256 amountInMax,
@@ -81,7 +81,7 @@ contract RouterEventEmitter {
     ) external {
         (bool success, bytes memory returnData) = router.delegatecall(
             abi.encodeWithSelector(
-                IBakerySwapRouter(router).swapTokensForExactBNB.selector,
+                IBitgertSwapRouter(router).swapTokensForExactBRISE.selector,
                 amountOut,
                 amountInMax,
                 path,
@@ -93,7 +93,7 @@ contract RouterEventEmitter {
         emit Amounts(abi.decode(returnData, (uint256[])));
     }
 
-    function swapExactTokensForBNB(
+    function swapExactTokensForBRISE(
         address router,
         uint256 amountIn,
         uint256 amountOutMin,
@@ -103,7 +103,7 @@ contract RouterEventEmitter {
     ) external {
         (bool success, bytes memory returnData) = router.delegatecall(
             abi.encodeWithSelector(
-                IBakerySwapRouter(router).swapExactTokensForBNB.selector,
+                IBitgertSwapRouter(router).swapExactTokensForBRISE.selector,
                 amountIn,
                 amountOutMin,
                 path,
@@ -115,7 +115,7 @@ contract RouterEventEmitter {
         emit Amounts(abi.decode(returnData, (uint256[])));
     }
 
-    function swapBNBForExactTokens(
+    function swapBRISEForExactTokens(
         address router,
         uint256 amountOut,
         address[] calldata path,
@@ -124,7 +124,7 @@ contract RouterEventEmitter {
     ) external payable {
         (bool success, bytes memory returnData) = router.delegatecall(
             abi.encodeWithSelector(
-                IBakerySwapRouter(router).swapBNBForExactTokens.selector,
+                IBitgertSwapRouter(router).swapBRISEForExactTokens.selector,
                 amountOut,
                 path,
                 to,

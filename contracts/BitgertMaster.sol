@@ -1,11 +1,11 @@
 pragma solidity =0.6.6;
 
-import '@BakeryProject/bakery-swap-lib/contracts/math/SafeMath.sol';
-import '@BakeryProject/bakery-swap-lib/contracts/token/BEP20/IBEP20.sol';
-import '@BakeryProject/bakery-swap-lib/contracts/token/BEP20/SafeBEP20.sol';
-import '@BakeryProject/bakery-swap-lib/contracts/access/Ownable.sol';
+import '@evofinance9/bitgert-swap-lib/contracts/math/SafeMath.sol';
+import '@evofinance9/bitgert-swap-lib/contracts/token/BEP20/IBEP20.sol';
+import '@evofinance9/bitgert-swap-lib/contracts/token/BEP20/SafeBEP20.sol';
+import '@evofinance9/bitgert-swap-lib/contracts/access/Ownable.sol';
 
-import './BakeryToken.sol';
+import './BitgertToken.sol';
 
 contract BakeryMaster is Ownable {
     using SafeMath for uint256;
@@ -57,7 +57,7 @@ contract BakeryMaster is Ownable {
     // Accumulated BAKEs per share, times 1e12.
     uint256 public accBakePerShareMultiple = 1E12;
     // The BAKE TOKEN!
-    BakeryToken public bake;
+    BitgertToken public bake;
     // Dev address.
     address public devAddr;
     address[] public poolAddresses;
@@ -71,7 +71,7 @@ contract BakeryMaster is Ownable {
     event EmergencyWithdraw(address indexed user, address indexed poolAddress, uint256 amount);
 
     constructor(
-        BakeryToken _bake,
+        BitgertToken _bake,
         address _devAddr,
         uint256 _bakeStartBlock,
         uint256 _startBlock,

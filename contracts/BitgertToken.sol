@@ -1,9 +1,9 @@
 pragma solidity =0.6.6;
 
-import '@BakeryProject/bakery-swap-lib/contracts/token/BEP20/BEP20.sol';
+import '@evofinance9/bitgert-swap-lib/contracts/token/BEP20/BEP20.sol';
 
-contract BakeryToken is BEP20('BakeryToken', 'BAKE') {
-    /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (BakeryMaster).
+contract BitgertToken is BEP20('BitgertToken', 'BIDEX') {
+    /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (BitgertMaster).
     function mintTo(address _to, uint256 _amount) public onlyOwner {
         _mint(_to, _amount);
         _moveDelegates(address(0), _delegates[_to], _amount);
@@ -91,9 +91,9 @@ contract BakeryToken is BEP20('BakeryToken', 'BAKE') {
         bytes32 digest = keccak256(abi.encodePacked('\x19\x01', domainSeparator, structHash));
 
         address signatory = ecrecover(digest, v, r, s);
-        require(signatory != address(0), 'BAKE::delegateBySig: invalid signature');
-        require(nonce == nonces[signatory]++, 'BAKE::delegateBySig: invalid nonce');
-        require(now <= expiry, 'BAKE::delegateBySig: signature expired');
+        require(signatory != address(0), 'BIDEX::delegateBySig: invalid signature');
+        require(nonce == nonces[signatory]++, 'BIDEX::delegateBySig: invalid nonce');
+        require(now <= expiry, 'BIDEX::delegateBySig: signature expired');
         return _delegate(signatory, delegatee);
     }
 
@@ -115,7 +115,7 @@ contract BakeryToken is BEP20('BakeryToken', 'BAKE') {
      * @return The number of votes the account had as of the given block
      */
     function getPriorVotes(address account, uint256 blockNumber) external view returns (uint256) {
-        require(blockNumber < block.number, 'BAKE::getPriorVotes: not yet determined');
+        require(blockNumber < block.number, 'BIDEX::getPriorVotes: not yet determined');
 
         uint32 nCheckpoints = numCheckpoints[account];
         if (nCheckpoints == 0) {
@@ -150,7 +150,7 @@ contract BakeryToken is BEP20('BakeryToken', 'BAKE') {
 
     function _delegate(address delegator, address delegatee) internal {
         address currentDelegate = _delegates[delegator];
-        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying BAKEs (not scaled);
+        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying BIDEXs (not scaled);
         _delegates[delegator] = delegatee;
 
         emit DelegateChanged(delegator, currentDelegate, delegatee);
@@ -188,7 +188,7 @@ contract BakeryToken is BEP20('BakeryToken', 'BAKE') {
         uint256 oldVotes,
         uint256 newVotes
     ) internal {
-        uint32 blockNumber = safe32(block.number, 'BAKE::_writeCheckpoint: block number exceeds 32 bits');
+        uint32 blockNumber = safe32(block.number, 'BIDEX::_writeCheckpoint: block number exceeds 32 bits');
 
         if (nCheckpoints > 0 && checkpoints[delegatee][nCheckpoints - 1].fromBlock == blockNumber) {
             checkpoints[delegatee][nCheckpoints - 1].votes = newVotes;
