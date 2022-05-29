@@ -4,7 +4,7 @@ async function main() {
   const [account] = await hre.ethers.getSigners();
   console.log(`Deployer account: ${account.address}`);
 
-  const factoryAddress = "0x02650a330F980362e7B233CF80b96D0Db04293b2";
+  const factoryAddress = "0x4A28e53A3A4427F911526baD815FC3e1a853e86b";
   const WBRISEAddress = "0x0eb9036cbE0f052386f36170c6b07eF0a0E3f710";
 
   const SwapRouter = await hre.ethers.getContractFactory("BitgertSwapRouter");
