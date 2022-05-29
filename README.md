@@ -1,15 +1,24 @@
-# Basic Sample Hardhat Project
+# Bitgert Swap Periphery
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
 
-Try running some of the following tasks:
+# Local Development
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
-```
+The following assumes the use of `node@>=10`.
+
+## Install Dependencies
+
+`yarn`
+
+## Add Environment Variables
+
+`MNEMONIC`
+`TESTNET_ADDRESS`
+`MAINNET_ADDRESS`
+
+## Compile Contracts
+
+`yarn compile`
+
+## Run Tests
+
+`yarn test`
