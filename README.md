@@ -21,4 +21,6 @@ The following assumes the use of `node@>=10`.
 
 ## Deploy Contract
 
+> :warning: **Depolyment**: Before deployment update factoryAddress variable in scripts/deploy.js!
+
 `npx hardhat run scripts/deploy.js --network mainnet`
