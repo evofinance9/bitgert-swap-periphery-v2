@@ -17,8 +17,8 @@ The following assumes the use of `node@>=10`.
 
 ## Compile Contracts
 
-`yarn compile`
+`npx hardhat compile`
 
-## Run Tests
+## Deploy Contract
 
-`yarn test`
+`npx hardhat run scripts/deploy.js --network mainnet`
