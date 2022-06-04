@@ -7,7 +7,7 @@ import '@evofinance9/bitgert-swap-lib/contracts/access/Ownable.sol';
 
 import './BitgertToken.sol';
 
-contract BakeryMaster is Ownable {
+contract BitgertMaster is Ownable {
     using SafeMath for uint256;
     using SafeBEP20 for IBEP20;
     // Info of each user.
@@ -314,7 +314,7 @@ contract BakeryMaster is Ownable {
         pool.lastRewardBlock = block.number;
     }
 
-    // Deposit LP tokens to BakeryMaster for BAKE allocation.
+    // Deposit LP tokens to BitgertMaster for BAKE allocation.
     function deposit(address _pair, uint256 _amount) public {
         PoolInfo storage pool = poolInfoMap[_pair];
         UserInfo storage userInfo = poolUserInfoMap[_pair][msg.sender];
@@ -333,7 +333,7 @@ contract BakeryMaster is Ownable {
         emit Deposit(msg.sender, _pair, _amount);
     }
 
-    // Withdraw LP tokens from BakeryMaster.
+    // Withdraw LP tokens from BitgertMaster.
     function withdraw(address _pair, uint256 _amount) public {
         PoolInfo storage pool = poolInfoMap[_pair];
         UserInfo storage userInfo = poolUserInfoMap[_pair][msg.sender];
