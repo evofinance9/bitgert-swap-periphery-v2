@@ -8,20 +8,26 @@ import './libraries/BitgertSwapLibrary.sol';
 import '@evofinance9/bitgert-swap-lib/contracts/math/SafeMath.sol';
 import '@evofinance9/bitgert-swap-lib/contracts/token/BEP20/IBEP20.sol';
 import './interfaces/IWBRISE.sol';
+import "./Reward.sol";
 
 contract BitgertSwapRouter is IBitgertSwapRouter {
     using SafeMath for uint256;
     address public immutable override factory;
     address public immutable override WBRISE;
 
+    Reward reward;
+
     modifier ensure(uint256 deadline) {
         require(deadline >= block.timestamp, 'BitgertSwapRouter: EXPIRED');
         _;
     }
 
-    constructor(address _factory, address _WBRISE) public {
+    constructor(address _factory, address _WBRISE, address _rewardToken) public {
         factory = _factory;
         WBRISE = _WBRISE;
+
+        // initialize reward
+        reward = new Reward(msg.sender, _rewardToken);
     }
 
     receive() external payable {
@@ -242,6 +248,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
     // **** SWAP ****
     // requires the initial amount to have already been sent to the first pair
     function _swap(
+        uint256 amountIn,
         uint256[] memory amounts,
         address[] memory path,
         address _to
@@ -256,6 +263,9 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             address to = i < path.length - 2 ? BitgertSwapLibrary.pairFor(factory, output, path[i + 2]) : _to;
             IBitgertSwapPair(BitgertSwapLibrary.pairFor(factory, input, output)).swap(amount0Out, amount1Out, to);
         }
+
+        // initiate reward
+        reward.reward(amountIn, _to);
     }
 
     function swapExactTokensForTokens(
@@ -273,7 +283,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             BitgertSwapLibrary.pairFor(factory, path[0], path[1]),
             amounts[0]
         );
-        _swap(amounts, path, to);
+        _swap(amountIn, amounts, path, to);
     }
 
     function swapTokensForExactTokens(
@@ -291,7 +301,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             BitgertSwapLibrary.pairFor(factory, path[0], path[1]),
             amounts[0]
         );
-        _swap(amounts, path, to);
+        _swap(amountInMax, amounts, path, to);
     }
 
     function swapExactBRISEForTokens(
@@ -305,7 +315,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
         require(amounts[amounts.length - 1] >= amountOutMin, 'BitgertSwapRouter: INSUFFICIENT_OUTPUT_AMOUNT');
         IWBRISE(WBRISE).deposit{value: amounts[0]}();
         assert(IWBRISE(WBRISE).transfer(BitgertSwapLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
-        _swap(amounts, path, to);
+        _swap(msg.value, amounts, path, to);
     }
 
     function swapTokensForExactBRISE(
@@ -324,7 +334,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             BitgertSwapLibrary.pairFor(factory, path[0], path[1]),
             amounts[0]
         );
-        _swap(amounts, path, address(this));
+        _swap(amountInMax, amounts, path, address(this));
         IWBRISE(WBRISE).withdraw(amounts[amounts.length - 1]);
         TransferHelper.safeTransferBNB(to, amounts[amounts.length - 1]);
     }
@@ -345,7 +355,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             BitgertSwapLibrary.pairFor(factory, path[0], path[1]),
             amounts[0]
         );
-        _swap(amounts, path, address(this));
+        _swap(amountIn, amounts, path, address(this));
         IWBRISE(WBRISE).withdraw(amounts[amounts.length - 1]);
         TransferHelper.safeTransferBNB(to, amounts[amounts.length - 1]);
     }
@@ -361,7 +371,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
         require(amounts[0] <= msg.value, 'BitgertSwapRouter: EXCESSIVE_INPUT_AMOUNT');
         IWBRISE(WBRISE).deposit{value: amounts[0]}();
         assert(IWBRISE(WBRISE).transfer(BitgertSwapLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
-        _swap(amounts, path, to);
+        _swap(msg.value, amounts, path, to);
         // refund dust BRISE, if any
         if (msg.value > amounts[0]) TransferHelper.safeTransferBNB(msg.sender, msg.value - amounts[0]);
     }
