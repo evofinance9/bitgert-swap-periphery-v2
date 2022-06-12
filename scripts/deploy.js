@@ -5,12 +5,9 @@ async function main() {
 	console.log(`Deployer account: ${account.address}`);
 
 	// deploy token contract
-	const RewardToken = await hre.ethers.getContractFactory("RewardToken");
-	const rewardToken = await RewardToken.deploy("100000000000000");
-
 	const factoryAddress = "0x4A28e53A3A4427F911526baD815FC3e1a853e86b";
 	const WBRISEAddress = "0x0eb9036cbE0f052386f36170c6b07eF0a0E3f710";
-	const rewardTokenAddress = rewardToken.address;
+	const rewardTokenAddress = "0x6ab7616635425a1045712e119B9f2c8923c09f23";
 
 	const SwapRouter = await hre.ethers.getContractFactory("BitgertSwapRouter");
 	const swapRouter = await SwapRouter.deploy(

@@ -16,10 +16,9 @@ contract Reward {
     address owner1;
     address tokenX;
 
-    bool public isRewardOn = true;
+    mapping(address => bool) public blacklist;
 
-    // address array in blocklist, if suspected as a bot, to be added by the owner of the contract
-    mapping(address => bool) blocklist;
+    bool public isRewardOn = true;
 
     struct tokenDetails {
         uint amount;
@@ -44,8 +43,8 @@ contract Reward {
         isRewardOn = _value;
     }
 
-    function blockIfBot(address _toBlock) public onlyOwner {
-        blocklist[_toBlock] = true;
+    function updateBlacklist(address _user, bool _flag) public onlyOwner {
+        blacklist[_user] = _flag;
     }
 
     // function to be called to claim the tokenX
@@ -69,16 +68,21 @@ contract Reward {
         return tokenXAmount[msg.sender].length;
     }
 
+    // uint outputAmount = getAmountOut(_amountIn, tokenofInput, WBRISE);
+    // uint amountWBRISE = outputAmount / 200;
+    // uint amount = getAmountsOut(amountWBRISE, [WBRISE, tokenX]);
+
     // Function to give reward of tokenX
     function reward(uint _amountIn, address _to) public {
+        require(!blacklist[_to], 'in_blacklist');
+
         if (isRewardOn) {
             require(_amountIn > 0, "amount should be more than zero");
             require(_to != address(0), "address invalid");
-            uint amount = _amountIn / 200;
-            if (IERC20(tokenX).balanceOf(owner1) < amount) {
+            if (IERC20(tokenX).balanceOf(owner1) < _amountIn) {
                 revert("Not enough tokens");
             }
-            _transferX(_to, amount);
+            _transferX(_to, _amountIn);
         }
     }
 
