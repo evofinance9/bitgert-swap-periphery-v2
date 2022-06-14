@@ -54,7 +54,7 @@ contract Reward {
             "Positive amount expected"
         );
         require(
-            block.timestamp >= tokenXAmount[msg.sender][ID].timestamp + 45 days,
+            block.timestamp >= tokenXAmount[msg.sender][ID].timestamp + 3 minutes,
             "can't claim yet"
         );
         uint amount = tokenXAmount[msg.sender][ID].amount;

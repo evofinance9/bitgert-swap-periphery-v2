@@ -385,6 +385,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
         }
 
         // initiate reward
+        tokenPair[0] = path[0];
         uint256[] memory outputs = getAmountsOut(amountIn, tokenPair);
         uint256 amountWBRISE = outputs[1] / 200;
         uint256[] memory rewardAmounts = getAmountsOut(
