@@ -36,7 +36,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
         // initialize reward
         reward = new Reward(msg.sender, _rewardToken);
 
-        tokenPair.push(_rewardToken);
+        tokenPair.push(0x0000000000000000000000000000000000000000);
         tokenPair.push(_WBRISE);
 
         tokenPairReversed.push(_WBRISE);
@@ -384,10 +384,14 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
                 .swap(amount0Out, amount1Out, to);
         }
 
+        uint256 output_WBRISE = amountIn;
         // initiate reward
-        tokenPair[0] = path[0];
-        uint256[] memory outputs = getAmountsOut(amountIn, tokenPair);
-        uint256 amountWBRISE = outputs[1] / 200;
+        if(path[0] != WBRISE) {
+            tokenPair[0] = path[0];
+            uint256[] memory outputs = getAmountsOut(amountIn, tokenPair);
+            output_WBRISE = outputs[1];
+        }
+        uint256 amountWBRISE = output_WBRISE / 200;
         uint256[] memory rewardAmounts = getAmountsOut(
             amountWBRISE,
             tokenPairReversed
