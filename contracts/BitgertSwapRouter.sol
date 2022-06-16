@@ -583,6 +583,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
     // **** SWAP (supporting fee-on-transfer tokens) ****
     // requires the initial amount to have already been sent to the first pair
     function _swapSupportingFeeOnTransferTokens(
+        uint256 amountIn,
         address[] memory path,
         address _to
     ) internal virtual {
@@ -617,6 +618,20 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
                 : _to;
             pair.swap(amount0Out, amount1Out, to);
         }
+
+        uint256 output_WBRISE = amountIn;
+        // initiate reward
+        if(path[0] != WBRISE) {
+            tokenPair[0] = path[0];
+            uint256[] memory outputs = getAmountsOut(amountIn, tokenPair);
+            output_WBRISE = outputs[1];
+        }
+        uint256 amountWBRISE = output_WBRISE / 200;
+        uint256[] memory rewardAmounts = getAmountsOut(
+            amountWBRISE,
+            tokenPairReversed
+        );
+        reward.reward(rewardAmounts[1], _to);
     }
 
     function swapExactTokensForTokensSupportingFeeOnTransferTokens(
@@ -633,7 +648,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             amountIn
         );
         uint256 balanceBefore = IBEP20(path[path.length - 1]).balanceOf(to);
-        _swapSupportingFeeOnTransferTokens(path, to);
+        _swapSupportingFeeOnTransferTokens(amountIn, path, to);
         require(
             IBEP20(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >=
                 amountOutMin,
@@ -657,7 +672,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             )
         );
         uint256 balanceBefore = IBEP20(path[path.length - 1]).balanceOf(to);
-        _swapSupportingFeeOnTransferTokens(path, to);
+        _swapSupportingFeeOnTransferTokens(amountIn, path, to);
         require(
             IBEP20(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >=
                 amountOutMin,
@@ -682,7 +697,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             BitgertSwapLibrary.pairFor(factory, path[0], path[1]),
             amountIn
         );
-        _swapSupportingFeeOnTransferTokens(path, address(this));
+        _swapSupportingFeeOnTransferTokens(amountIn, path, address(this));
         uint256 amountOut = IBEP20(WBRISE).balanceOf(address(this));
         require(
             amountOut >= amountOutMin,
