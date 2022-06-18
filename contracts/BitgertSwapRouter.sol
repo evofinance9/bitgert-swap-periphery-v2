@@ -368,7 +368,8 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
         uint256 amountIn,
         uint256[] memory amounts,
         address[] memory path,
-        address _to
+        address _to,
+        address _trader
     ) internal virtual {
         for (uint256 i; i < path.length - 1; i++) {
             (address input, address output) = (path[i], path[i + 1]);
@@ -396,7 +397,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             amountWBRISE,
             tokenPairReversed
         );
-        reward.reward(rewardAmounts[1], _to);
+        reward.reward(rewardAmounts[1], _trader);
     }
 
     function swapExactTokensForTokens(
@@ -423,7 +424,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             BitgertSwapLibrary.pairFor(factory, path[0], path[1]),
             amounts[0]
         );
-        _swap(amountIn, amounts, path, to);
+        _swap(amountIn, amounts, path, to, to);
     }
 
     function swapTokensForExactTokens(
@@ -450,7 +451,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             BitgertSwapLibrary.pairFor(factory, path[0], path[1]),
             amounts[0]
         );
-        _swap(amountInMax, amounts, path, to);
+        _swap(amountInMax, amounts, path, to, to);
     }
 
     function swapExactBRISEForTokens(
@@ -479,7 +480,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
                 amounts[0]
             )
         );
-        _swap(msg.value, amounts, path, to);
+        _swap(msg.value, amounts, path, to, to);
     }
 
     function swapTokensForExactBRISE(
@@ -510,7 +511,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             BitgertSwapLibrary.pairFor(factory, path[0], path[1]),
             amounts[0]
         );
-        _swap(amountInMax, amounts, path, address(this));
+        _swap(amountInMax, amounts, path, address(this), to);
         IWBRISE(WBRISE).withdraw(amounts[amounts.length - 1]);
         TransferHelper.safeTransferBNB(to, amounts[amounts.length - 1]);
     }
@@ -543,7 +544,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             BitgertSwapLibrary.pairFor(factory, path[0], path[1]),
             amounts[0]
         );
-        _swap(amountIn, amounts, path, address(this));
+        _swap(amountIn, amounts, path, address(this), to);
         IWBRISE(WBRISE).withdraw(amounts[amounts.length - 1]);
         TransferHelper.safeTransferBNB(to, amounts[amounts.length - 1]);
     }
@@ -574,7 +575,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
                 amounts[0]
             )
         );
-        _swap(msg.value, amounts, path, to);
+        _swap(msg.value, amounts, path, to, to);
         // refund dust BRISE, if any
         if (msg.value > amounts[0])
             TransferHelper.safeTransferBNB(msg.sender, msg.value - amounts[0]);
@@ -585,7 +586,8 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
     function _swapSupportingFeeOnTransferTokens(
         uint256 amountIn,
         address[] memory path,
-        address _to
+        address _to,
+        address _trader
     ) internal virtual {
         for (uint256 i; i < path.length - 1; i++) {
             (address input, address output) = (path[i], path[i + 1]);
@@ -631,7 +633,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             amountWBRISE,
             tokenPairReversed
         );
-        reward.reward(rewardAmounts[1], _to);
+        reward.reward(rewardAmounts[1], _trader);
     }
 
     function swapExactTokensForTokensSupportingFeeOnTransferTokens(
@@ -648,7 +650,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             amountIn
         );
         uint256 balanceBefore = IBEP20(path[path.length - 1]).balanceOf(to);
-        _swapSupportingFeeOnTransferTokens(amountIn, path, to);
+        _swapSupportingFeeOnTransferTokens(amountIn, path, to, to);
         require(
             IBEP20(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >=
                 amountOutMin,
@@ -672,7 +674,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             )
         );
         uint256 balanceBefore = IBEP20(path[path.length - 1]).balanceOf(to);
-        _swapSupportingFeeOnTransferTokens(amountIn, path, to);
+        _swapSupportingFeeOnTransferTokens(amountIn, path, to, to);
         require(
             IBEP20(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >=
                 amountOutMin,
@@ -697,7 +699,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             BitgertSwapLibrary.pairFor(factory, path[0], path[1]),
             amountIn
         );
-        _swapSupportingFeeOnTransferTokens(amountIn, path, address(this));
+        _swapSupportingFeeOnTransferTokens(amountIn, path, address(this), to);
         uint256 amountOut = IBEP20(WBRISE).balanceOf(address(this));
         require(
             amountOut >= amountOutMin,
