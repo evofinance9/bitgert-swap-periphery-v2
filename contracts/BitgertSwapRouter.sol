@@ -8,6 +8,7 @@ import "./libraries/BitgertSwapLibrary.sol";
 import "@evofinance9/bitgert-swap-lib/contracts/math/SafeMath.sol";
 import "@evofinance9/bitgert-swap-lib/contracts/token/BEP20/IBEP20.sol";
 import "./interfaces/IWBRISE.sol";
+import "./interfaces/IBRC20.sol";
 import "./Reward.sol";
 
 contract BitgertSwapRouter is IBitgertSwapRouter {
@@ -17,6 +18,10 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
 
     address[] tokenPair;
     address[] tokenPairReversed;
+
+    // fee
+    address public feeTo;
+    address public feeToSetter;
 
     Reward public reward;
 
@@ -32,6 +37,10 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
     ) public {
         factory = _factory;
         WBRISE = _WBRISE;
+
+        feeToSetter = msg.sender;
+        // default feeTo is feeToSetter
+        feeTo = feeToSetter;
 
         // initialize reward
         reward = new Reward(msg.sender, _rewardToken);
@@ -387,7 +396,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
 
         uint256 output_WBRISE = amountIn;
         // initiate reward
-        if(path[0] != WBRISE) {
+        if (path[0] != WBRISE) {
             tokenPair[0] = path[0];
             uint256[] memory outputs = getAmountsOut(amountIn, tokenPair);
             output_WBRISE = outputs[1];
@@ -414,6 +423,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
         returns (uint256[] memory amounts)
     {
         amounts = BitgertSwapLibrary.getAmountsOut(factory, amountIn, path);
+        amounts[0] = takeFee(amounts[0], path[0], to);
         require(
             amounts[amounts.length - 1] >= amountOutMin,
             "BitgertSwapRouter: INSUFFICIENT_OUTPUT_AMOUNT"
@@ -441,6 +451,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
         returns (uint256[] memory amounts)
     {
         amounts = BitgertSwapLibrary.getAmountsIn(factory, amountOut, path);
+        amounts[0] = takeFee(amounts[0], path[0], to);
         require(
             amounts[0] <= amountInMax,
             "BitgertSwapRouter: EXCESSIVE_INPUT_AMOUNT"
@@ -474,6 +485,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             "BitgertSwapRouter: INSUFFICIENT_OUTPUT_AMOUNT"
         );
         IWBRISE(WBRISE).deposit{value: amounts[0]}();
+        amounts[0] = takeFee(amounts[0], WBRISE, to);
         assert(
             IWBRISE(WBRISE).transfer(
                 BitgertSwapLibrary.pairFor(factory, path[0], path[1]),
@@ -501,6 +513,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             "BitgertSwapRouter: INVALID_PATH"
         );
         amounts = BitgertSwapLibrary.getAmountsIn(factory, amountOut, path);
+        amounts[0] = takeFee(amounts[0], path[0], to);
         require(
             amounts[0] <= amountInMax,
             "BitgertSwapRouter: EXCESSIVE_INPUT_AMOUNT"
@@ -534,6 +547,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             "BitgertSwapRouter: INVALID_PATH"
         );
         amounts = BitgertSwapLibrary.getAmountsOut(factory, amountIn, path);
+        amounts[0] = takeFee(amounts[0], path[0], to);
         require(
             amounts[amounts.length - 1] >= amountOutMin,
             "BitgertSwapRouter: INSUFFICIENT_OUTPUT_AMOUNT"
@@ -564,6 +578,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
     {
         require(path[0] == WBRISE, "BitgertSwapRouter: INVALID_PATH");
         amounts = BitgertSwapLibrary.getAmountsIn(factory, amountOut, path);
+        amounts[0] = takeFee(amounts[0], WBRISE, to);
         require(
             amounts[0] <= msg.value,
             "BitgertSwapRouter: EXCESSIVE_INPUT_AMOUNT"
@@ -623,7 +638,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
 
         uint256 output_WBRISE = amountIn;
         // initiate reward
-        if(path[0] != WBRISE) {
+        if (path[0] != WBRISE) {
             tokenPair[0] = path[0];
             uint256[] memory outputs = getAmountsOut(amountIn, tokenPair);
             output_WBRISE = outputs[1];
@@ -643,6 +658,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
         address to,
         uint256 deadline
     ) external virtual override ensure(deadline) {
+        amountIn = takeFee(amountIn, path[0], to);
         TransferHelper.safeTransferFrom(
             path[0],
             msg.sender,
@@ -667,6 +683,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
         require(path[0] == WBRISE, "BitgertSwapRouter: INVALID_PATH");
         uint256 amountIn = msg.value;
         IWBRISE(WBRISE).deposit{value: amountIn}();
+        amountIn = takeFee(amountIn, WBRISE, to);
         assert(
             IWBRISE(WBRISE).transfer(
                 BitgertSwapLibrary.pairFor(factory, path[0], path[1]),
@@ -693,6 +710,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             path[path.length - 1] == WBRISE,
             "BitgertSwapRouter: INVALID_PATH"
         );
+        amountIn = takeFee(amountIn, path[0], to);
         TransferHelper.safeTransferFrom(
             path[0],
             msg.sender,
@@ -752,5 +770,37 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
         returns (uint256[] memory amounts)
     {
         return BitgertSwapLibrary.getAmountsIn(factory, amountOut, path);
+    }
+
+    function takeFee(uint256 amount, address tokenAddress, address trader)
+        internal
+        virtual
+        returns (uint256)
+    {
+        uint256 feeAmount = amount / 500;
+
+        if (tokenAddress == WBRISE) {
+            assert(IWBRISE(WBRISE).transfer(feeTo, feeAmount));
+        } else {
+            assert(
+                IBRC20(tokenAddress).transferFrom(
+                    trader,
+                    feeTo,
+                    feeAmount
+                )
+            );
+        }
+
+        return amount - feeAmount;
+    }
+
+    function setFeeTo(address _feeTo) external {
+        require(msg.sender == feeToSetter, "BitgertSwapRouter: FORBIDDEN");
+        feeTo = _feeTo;
+    }
+
+    function setFeeToSetter(address _feeToSetter) external {
+        require(msg.sender == feeToSetter, "BitgertSwapRouter: FORBIDDEN");
+        feeToSetter = _feeToSetter;
     }
 }
