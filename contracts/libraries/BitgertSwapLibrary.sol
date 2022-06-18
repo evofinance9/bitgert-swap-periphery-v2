@@ -27,7 +27,7 @@ library BitgertSwapLibrary {
                         hex'ff',
                         factory,
                         keccak256(abi.encodePacked(token0, token1)),
-                        hex'bfda6dce8b8a2f3cde65c7002e58697e53486be838031393f8729af841326434' // init code hash
+                        hex'd0a65eee32c829677d84ce15b5d94f37807e582560fe4d4f2150bc81a70ba430' // init code hash
                     )
                 )
             )

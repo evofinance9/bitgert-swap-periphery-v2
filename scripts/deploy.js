@@ -5,7 +5,7 @@ async function main() {
 	console.log(`Deployer account: ${account.address}`);
 
 	// deploy token contract
-	const factoryAddress = "0x4e5855A85eD76B246d1F3620741AC95d421A73A2";
+	const factoryAddress = "0xe070606FB836967dAfb5ebF8724f98Cf968286fB";
 	const WBRISEAddress = "0x0eb9036cbE0f052386f36170c6b07eF0a0E3f710";
 	const rewardTokenAddress = "0x6ab7616635425a1045712e119B9f2c8923c09f23";
 
