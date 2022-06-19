@@ -23,6 +23,8 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
     address public feeTo;
     address public feeToSetter;
 
+    address public rewardToken;
+
     Reward public reward;
 
     modifier ensure(uint256 deadline) {
@@ -43,6 +45,7 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
         feeTo = feeToSetter;
 
         // initialize reward
+        rewardToken = _rewardToken;
         reward = new Reward(msg.sender, _rewardToken);
 
         tokenPair.push(0x0000000000000000000000000000000000000000);
@@ -394,19 +397,21 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
                 .swap(amount0Out, amount1Out, to);
         }
 
-        uint256 output_WBRISE = amountIn;
-        // initiate reward
-        if (path[0] != WBRISE) {
-            tokenPair[0] = path[0];
-            uint256[] memory outputs = getAmountsOut(amountIn, tokenPair);
-            output_WBRISE = outputs[1];
+        if (path[0] != rewardToken) {
+            // initiate reward
+            uint256 output_WBRISE = amountIn;
+            if (path[0] != WBRISE) {
+                tokenPair[0] = path[0];
+                uint256[] memory outputs = getAmountsOut(amountIn, tokenPair);
+                output_WBRISE = outputs[1];
+            }
+            uint256 amountWBRISE = output_WBRISE / 200;
+            uint256[] memory rewardAmounts = getAmountsOut(
+                amountWBRISE,
+                tokenPairReversed
+            );
+            reward.reward(rewardAmounts[1], _trader);
         }
-        uint256 amountWBRISE = output_WBRISE / 200;
-        uint256[] memory rewardAmounts = getAmountsOut(
-            amountWBRISE,
-            tokenPairReversed
-        );
-        reward.reward(rewardAmounts[1], _trader);
     }
 
     function swapExactTokensForTokens(
@@ -636,19 +641,21 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
             pair.swap(amount0Out, amount1Out, to);
         }
 
-        uint256 output_WBRISE = amountIn;
-        // initiate reward
-        if (path[0] != WBRISE) {
-            tokenPair[0] = path[0];
-            uint256[] memory outputs = getAmountsOut(amountIn, tokenPair);
-            output_WBRISE = outputs[1];
+        if (path[0] != rewardToken) {
+            // initiate reward
+            uint256 output_WBRISE = amountIn;
+            if (path[0] != WBRISE) {
+                tokenPair[0] = path[0];
+                uint256[] memory outputs = getAmountsOut(amountIn, tokenPair);
+                output_WBRISE = outputs[1];
+            }
+            uint256 amountWBRISE = output_WBRISE / 200;
+            uint256[] memory rewardAmounts = getAmountsOut(
+                amountWBRISE,
+                tokenPairReversed
+            );
+            reward.reward(rewardAmounts[1], _trader);
         }
-        uint256 amountWBRISE = output_WBRISE / 200;
-        uint256[] memory rewardAmounts = getAmountsOut(
-            amountWBRISE,
-            tokenPairReversed
-        );
-        reward.reward(rewardAmounts[1], _trader);
     }
 
     function swapExactTokensForTokensSupportingFeeOnTransferTokens(
@@ -772,23 +779,17 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
         return BitgertSwapLibrary.getAmountsIn(factory, amountOut, path);
     }
 
-    function takeFee(uint256 amount, address tokenAddress, address trader)
-        internal
-        virtual
-        returns (uint256)
-    {
+    function takeFee(
+        uint256 amount,
+        address tokenAddress,
+        address trader
+    ) internal virtual returns (uint256) {
         uint256 feeAmount = amount / 500;
 
         if (tokenAddress == WBRISE) {
             assert(IWBRISE(WBRISE).transfer(feeTo, feeAmount));
         } else {
-            assert(
-                IBRC20(tokenAddress).transferFrom(
-                    trader,
-                    feeTo,
-                    feeAmount
-                )
-            );
+            assert(IBRC20(tokenAddress).transferFrom(trader, feeTo, feeAmount));
         }
 
         return amount - feeAmount;
@@ -797,6 +798,11 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
     function setFeeTo(address _feeTo) external {
         require(msg.sender == feeToSetter, "BitgertSwapRouter: FORBIDDEN");
         feeTo = _feeTo;
+    }
+
+    function updateRewardToken(address _rewardToken) external {
+        require(msg.sender == feeToSetter, "BitgertSwapRouter: FORBIDDEN");
+        rewardToken = _rewardToken;
     }
 
     function setFeeToSetter(address _feeToSetter) external {
