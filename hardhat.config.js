@@ -23,13 +23,13 @@ module.exports = {
 		hardhat: {},
 		testnet: {
 			url: process.env.TESTNET_ADDRESS,
-			accounts: { mnemonic: process.env.MNEMONIC },
+			accounts: [ process.env.PRIVET_KEY ],
 		},
 		mainnet: {
 			url: process.env.MAINNET_ADDRESS,
 			chainId: 32520,
 			gasPrice: 5000000000,
-			accounts: { mnemonic: process.env.MNEMONIC },
+			accounts: [ process.env.PRIVET_KEY ],
 		},
 	},
 };

